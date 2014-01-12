@@ -1,4 +1,5 @@
 ﻿var util = require('util'),
+    _ = require('lodash'),
     EventEmitter = require('events').EventEmitter,
     randomstring = require("randomstring"),
     Terrain = require('./terrain/terrain'),
@@ -67,20 +68,30 @@ World.prototype.registerHandlers = function() {
     this.register('inventoryHandler');
     this.register('pluginHandler');
 
-    self.on('use_entity', function(data, player) { self.packetRouter.useEntity(data, player) });
-    self.on('entity_action', function(data, player) { self.packetRouter.entityAction(data, player) });
-    self.on('close_window', function(data, player) { self.packetRouter.closeWindow(data, player) });
-    self.on('click_window', function(data, player) { self.packetRouter.clickWindow(data, player) });
-    self.on('confirm_transaction', function(data, player) { self.packetRouter.confirmTransaction(data, player) });
-    self.on('creative_inventory_action', function(data, player) { self.packetRouter.creativeInventoryAction(data, player) });
-    self.on('enchant_item', function(data, player) { self.packetRouter.enchantItem(data, player) });
-    self.on('update_sign', function(data, player) { self.packetRouter.updateSign(data, player) });
-    self.on('player_abilities', function(data, player) { self.packetRouter.playerAbilities(data, player) });
-    self.on('locale_view_distance', function(data, player) { self.packetRouter.localeViewDistance(data, player) });
-    self.on('disconnect', function(data, player) { self.disconnect(data, player) });
+    var packetRouterEvents = {
+        use_entity: 'useEntity',
+        entity_action: 'entityAction',
+        close_window: 'closeWindow',
+        click_window: 'clickWindow',
+        confirm_transaction: 'confirmTransaction',
+        creative_inventory_action: 'creativeInventoryAction',
+        enchant_item: 'enchantItem',
+        update_sign: 'updateSign',
+        player_abilities: 'playerAbilities',
+        locale_view_distance: 'localeViewDistance'
+    }
+    
+    _(packetRouterEvents).forEach(function(fnName, eventName) {
+      self.on(eventName, function(data, player) {
+        self.packetRouter[fnName](data, player);
+      });
+    });
+
+    self.on('disconnect', function (data, player) { self.disconnect(data,player) });
     self.on('end', function(player) { self.socketClosed(player) });
     self.on('destroy', function(player) { self.socketClosed(player) });
 };
+
 
 World.prototype.sendEntitiesToPlayer = function(targetPlayer) {
     targetPlayer.sendItemEntities(this.itemEntities, this.packetWriter);

@@ -15,7 +15,8 @@
     "webworker-threads": "~0.4.9",
     "varint": "~1.0.0",
     "request": "~2.30.0",
-    "randomstring": "~1.0.2"
+    "randomstring": "~1.0.2",
+    "lodash": "~2.4.1"
   },
   "engines": {
     "node": ">=0.10.3"
